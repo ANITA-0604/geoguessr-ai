@@ -1,0 +1,164 @@
+{"city":"Abilene","lat":32.4487,"lon":-99.7331}
+{"city":"Akron","lat":41.0814,"lon":-81.519}
+{"city":"Albuquerque","lat":35.0844,"lon":-106.6504}
+{"city":"Alexandria","lat":38.8048,"lon":-77.0469}
+{"city":"Allentown","lat":40.6023,"lon":-75.4714}
+{"city":"Amarillo","lat":35.221,"lon":-101.8313}
+{"city":"Anchorage","lat":61.2181,"lon":-149.9003}
+{"city":"Ann Arbor","lat":42.2808,"lon":-83.743}
+{"city":"Arlington","lat":32.7357,"lon":-97.1081}
+{"city":"Arvada","lat":39.8028,"lon":-105.0875}
+{"city":"Athens","lat":33.9519,"lon":-83.3576}
+{"city":"Atlanta","lat":33.749,"lon":-84.388}
+{"city":"Augusta","lat":33.4735,"lon":-82.0105}
+{"city":"Aurora","lat":39.7294,"lon":-104.8319}
+{"city":"Austin","lat":30.2672,"lon":-97.7431}
+{"city":"Bakersfield","lat":35.3733,"lon":-119.0187}
+{"city":"Baltimore","lat":39.2904,"lon":-76.6122}
+{"city":"Baton Rouge","lat":30.4515,"lon":-91.1871}
+{"city":"Bellevue","lat":47.6104,"lon":-122.2007}
+{"city":"Berkeley","lat":37.8715,"lon":-122.273}
+{"city":"Birmingham","lat":33.5186,"lon":-86.8104}
+{"city":"Boise","lat":43.615,"lon":-116.2023}
+{"city":"Boston","lat":42.3601,"lon":-71.0589}
+{"city":"Boulder","lat":40.0149,"lon":-105.2705}
+{"city":"Bridgeport","lat":41.1792,"lon":-73.1894}
+{"city":"Brooklyn","lat":40.6782,"lon":-73.9442}
+{"city":"Buffalo","lat":42.8864,"lon":-78.8784}
+{"city":"Cambridge","lat":42.3736,"lon":-71.1097}
+{"city":"Cape Coral","lat":26.5629,"lon":-81.9495}
+{"city":"Cary","lat":35.7915,"lon":-78.7811}
+{"city":"Cedar Rapids","lat":42.0083,"lon":-91.6441}
+{"city":"Chandler","lat":33.3062,"lon":-111.8413}
+{"city":"Charleston","lat":32.7765,"lon":-79.9311}
+{"city":"Charlotte","lat":35.2271,"lon":-80.8431}
+{"city":"Chattanooga","lat":35.0456,"lon":-85.3097}
+{"city":"Chicago","lat":41.8781,"lon":-87.6298}
+{"city":"Chula Vista","lat":32.6401,"lon":-117.0842}
+{"city":"Cincinnati","lat":39.1031,"lon":-84.512}
+{"city":"Cleveland","lat":41.4993,"lon":-81.6944}
+{"city":"Colorado Springs","lat":38.8339,"lon":-104.8214}
+{"city":"Columbia","lat":34.0007,"lon":-81.0348}
+{"city":"Columbus","lat":39.9612,"lon":-82.9988}
+{"city":"Concord","lat":37.9779,"lon":-122.0311}
+{"city":"Corona","lat":33.8753,"lon":-117.5664}
+{"city":"Corpus Christi","lat":27.8006,"lon":-97.3964}
+{"city":"Dallas","lat":32.7767,"lon":-96.797}
+{"city":"Dayton","lat":39.7589,"lon":-84.1916}
+{"city":"Denton","lat":33.2148,"lon":-97.1331}
+{"city":"Denver","lat":39.7392,"lon":-104.9903}
+{"city":"Des Moines","lat":41.5868,"lon":-93.625}
+{"city":"Detroit","lat":42.3314,"lon":-83.0458}
+{"city":"Durham","lat":35.994,"lon":-78.8986}
+{"city":"El Paso","lat":31.7619,"lon":-106.485}
+{"city":"Elk Grove","lat":38.4088,"lon":-121.3716}
+{"city":"Eugene","lat":44.0521,"lon":-123.0867}
+{"city":"Evansville","lat":37.9716,"lon":-87.5711}
+{"city":"Everett","lat":47.9789,"lon":-122.2021}
+{"city":"Fayetteville","lat":36.0626,"lon":-94.1574}
+{"city":"Fontana","lat":34.0922,"lon":-117.435}
+{"city":"Fort Collins","lat":40.5853,"lon":-105.0844}
+{"city":"Fort Lauderdale","lat":26.1224,"lon":-80.1373}
+{"city":"Fort Worth","lat":32.7555,"lon":-97.3308}
+{"city":"Fresno","lat":36.7378,"lon":-119.7871}
+{"city":"Frisco","lat":33.1507,"lon":-96.8236}
+{"city":"Fullerton","lat":33.8704,"lon":-117.9243}
+{"city":"Gainesville","lat":29.6516,"lon":-82.3248}
+{"city":"Garden Grove","lat":33.7739,"lon":-117.9414}
+{"city":"Garland","lat":32.9126,"lon":-96.6389}
+{"city":"Gilbert","lat":33.3528,"lon":-111.789}
+{"city":"Glendale","lat":33.5387,"lon":-112.186}
+{"city":"Grand Rapids","lat":42.9634,"lon":-85.6681}
+{"city":"Greensboro","lat":36.0726,"lon":-79.791}
+{"city":"Gresham","lat":45.4982,"lon":-122.431}
+{"city":"Hartford","lat":41.7658,"lon":-72.6734}
+{"city":"Hayward","lat":37.6688,"lon":-122.0808}
+{"city":"Henderson","lat":36.0395,"lon":-114.9817}
+{"city":"Hialeah","lat":25.8576,"lon":-80.2781}
+{"city":"Honolulu","lat":21.3099,"lon":-157.8581}
+{"city":"Houston","lat":29.7604,"lon":-95.3698}
+{"city":"Huntington Beach","lat":33.6595,"lon":-117.9988}
+{"city":"Huntsville","lat":34.7304,"lon":-86.5861}
+{"city":"Indianapolis","lat":39.7684,"lon":-86.1581}
+{"city":"Irvine","lat":33.6846,"lon":-117.8265}
+{"city":"Irving","lat":32.814,"lon":-96.9489}
+{"city":"Jackson","lat":32.2988,"lon":-90.1848}
+{"city":"Jacksonville","lat":30.3322,"lon":-81.6557}
+{"city":"Jersey City","lat":40.7178,"lon":-74.0431}
+{"city":"Kansas City","lat":39.0997,"lon":-94.5786}
+{"city":"Knoxville","lat":35.9606,"lon":-83.9207}
+{"city":"Lafayette","lat":30.2241,"lon":-92.0198}
+{"city":"Lakeland","lat":28.0395,"lon":-81.9498}
+{"city":"Lancaster","lat":34.6868,"lon":-118.1542}
+{"city":"Lansing","lat":42.7325,"lon":-84.5555}
+{"city":"Laredo","lat":27.5306,"lon":-99.4803}
+{"city":"Las Vegas","lat":36.1699,"lon":-115.1398}
+{"city":"Lexington","lat":38.0406,"lon":-84.5037}
+{"city":"Lincoln","lat":40.8136,"lon":-96.7026}
+{"city":"Little Rock","lat":34.7465,"lon":-92.2896}
+{"city":"Long Beach","lat":33.7701,"lon":-118.1937}
+{"city":"Los Angeles","lat":34.0522,"lon":-118.2437}
+{"city":"Louisville","lat":38.2527,"lon":-85.7585}
+{"city":"Madison","lat":43.0731,"lon":-89.4012}
+{"city":"McAllen","lat":26.2034,"lon":-98.23}
+{"city":"Memphis","lat":35.1495,"lon":-90.049}
+{"city":"Mesa","lat":33.4151,"lon":-111.8315}
+{"city":"Miami","lat":25.7617,"lon":-80.1918}
+{"city":"Milwaukee","lat":43.0389,"lon":-87.9065}
+{"city":"Minneapolis","lat":44.9778,"lon":-93.265}
+{"city":"Modesto","lat":37.6391,"lon":-120.9969}
+{"city":"Montgomery","lat":32.3792,"lon":-86.3077}
+{"city":"Nashville","lat":36.1627,"lon":-86.7816}
+{"city":"New Haven","lat":41.3083,"lon":-72.9279}
+{"city":"New Orleans","lat":29.9511,"lon":-90.0715}
+{"city":"New York","lat":40.7128,"lon":-74.006}
+{"city":"Newark","lat":40.7357,"lon":-74.1724}
+{"city":"Norfolk","lat":36.8508,"lon":-76.2859}
+{"city":"Oakland","lat":37.8044,"lon":-122.2711}
+{"city":"Oklahoma City","lat":35.4676,"lon":-97.5164}
+{"city":"Omaha","lat":41.2565,"lon":-95.9345}
+{"city":"Ontario","lat":34.0633,"lon":-117.6509}
+{"city":"Orange","lat":33.7879,"lon":-117.8531}
+{"city":"Orlando","lat":28.5383,"lon":-81.3792}
+{"city":"Overland Park","lat":38.9822,"lon":-94.6708}
+{"city":"Oxnard","lat":34.1975,"lon":-119.1771}
+{"city":"Palmdale","lat":34.5794,"lon":-118.1165}
+{"city":"Pasadena","lat":34.1478,"lon":-118.1445}
+{"city":"Paterson","lat":40.9168,"lon":-74.1718}
+{"city":"Peoria","lat":40.6936,"lon":-89.5889}
+{"city":"Philadelphia","lat":39.9526,"lon":-75.1652}
+{"city":"Phoenix","lat":33.4484,"lon":-112.074}
+{"city":"Pittsburgh","lat":40.4406,"lon":-79.9959}
+{"city":"Plano","lat":33.0198,"lon":-96.6989}
+{"city":"Pomona","lat":34.0551,"lon":-117.749}
+{"city":"Portland","lat":45.5051,"lon":-122.675}
+{"city":"Providence","lat":41.824,"lon":-71.4128}
+{"city":"Raleigh","lat":35.7796,"lon":-78.6382}
+{"city":"Reno","lat":39.5296,"lon":-119.8138}
+{"city":"Richmond","lat":37.5407,"lon":-77.436}
+{"city":"Riverside","lat":33.9806,"lon":-117.3755}
+{"city":"Rochester","lat":43.1566,"lon":-77.6088}
+{"city":"Roseville","lat":38.7521,"lon":-121.288}
+{"city":"Sacramento","lat":38.5816,"lon":-121.4944}
+{"city":"Salem","lat":44.9429,"lon":-123.0351}
+{"city":"Salt Lake City","lat":40.7608,"lon":-111.891}
+{"city":"San Antonio","lat":29.4241,"lon":-98.4936}
+{"city":"San Diego","lat":32.7157,"lon":-117.1611}
+{"city":"San Francisco","lat":37.7749,"lon":-122.4194}
+{"city":"San Jose","lat":37.3382,"lon":-121.8863}
+{"city":"Santa Ana","lat":33.7455,"lon":-117.8677}
+{"city":"Santa Clara","lat":37.3541,"lon":-121.9552}
+{"city":"Santa Rosa","lat":38.4404,"lon":-122.7141}
+{"city":"Savannah","lat":32.0809,"lon":-81.0912}
+{"city":"Scottsdale","lat":33.4942,"lon":-111.9261}
+{"city":"Seattle","lat":47.6062,"lon":-122.3321}
+{"city":"Shreveport","lat":32.5252,"lon":-93.7502}
+{"city":"Sioux Falls","lat":43.5446,"lon":-96.7311}
+{"city":"Spokane","lat":47.6588,"lon":-117.426}
+{"city":"Springfield","lat":37.2089,"lon":-93.2923}
+{"city":"St. Louis","lat":38.627,"lon":-90.1994}
+{"city":"St. Paul","lat":44.9537,"lon":-93.09}
+{"city":"Stamford","lat":41.0534,"lon":-73.5387}
+{"city":"Stockton","lat":37.9586,"lon":-121.2908}
+{"city":"Sunnyvale","lat":37.3688,"lon":-122.0363}
+{"city":"Syracuse","lat":43.0481,"lon":-76.1474}

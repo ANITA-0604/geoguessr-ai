@@ -4,31 +4,38 @@ import os
 import json
 from random import randint
 import argparse
-from csv import writer
-# Consider using https://osmnx.readthedocs.io/en/stable/osmnx.html#osmnx.utils_geo.sample_points for street gps coords
-# Stack Overflow on how to get the coordinates: https://stackoverflow.com/questions/68367074/how-to-generate-random-lat-long-points-within-geographical-boundaries
+import random
+
+
+STREETVIEW_URL = "https://maps.googleapis.com/maps/api/streetview"
+STREETVIEW_METADATA_URL = "https://maps.googleapis.com/maps/api/streetview/metadata"
+ELEVATION_URL = "https://maps.googleapis.com/maps/api/elevation/json"
+GEOCODING_URL = "https://maps.googleapis.com/maps/api/geocode/json"
+
+cities = []
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cities", help="The folder full of addresses per city to read and extract GPS coordinates from", required=True, type=str)
+    parser.add_argument("--cities", help="The file full of addresses per city to read and extract GPS coordinates from", required=True, type=str)
     parser.add_argument("--output", help="The output folder where the images will be stored, (defaults to: images/)", default='images/', type=str)
-    parser.add_argument("--icount", help="The amount of images to pull (defaults to 25,000)", default=25000, type=int)
+    parser.add_argument("--icount", help="Images per city", default=200, type=int)
     parser.add_argument("--key", help="Your Google Street View API Key", type=str, required=True)
     return parser.parse_args()
 
 args = get_args()
-url = 'https://maps.googleapis.com/maps/api/streetview'
-cities = []
 
 def load_cities():
-    for city in os.listdir(args.cities):
-        with open(os.path.join(args.cities, city)) as f:
-            coordinates = []
-            print(f'Loading {city} addresses...')
-            for line in tqdm(f):
-                data = json.loads(line)
-                coordinates.append(data['geometry']['coordinates'])
-            cities.append(coordinates)
+    with open(args.cities, 'r') as f:
+        for line in f:
+            data = json.loads(line)
+            lat = data.get("lat")
+            lon = data.get("lon")
+            if lat is not None and lon is not None:
+                cities.append([lon, lat])
+
+def jitter(coord, radius=0.035):
+    lat, lon = coord
+    return lat + random.uniform(-radius, radius), lon + random.uniform(-radius, radius)
 
 def main():
     # Open and create all the necessary files & folders
@@ -36,42 +43,93 @@ def main():
     
     load_cities()
     
-    coord_output_file = open(os.path.join(args.output, 'picture_coords.csv'), 'w', newline='')
-    csv_writer = writer(coord_output_file)
+    total_images = args.icount * len(cities)
     
-    for i in tqdm(range(args.icount)):
-        cities_count = []
-        cities_count = [0] * len(cities)
-        city_index = randint(0, len(cities) - 1)
-        city = cities[city_index]
-        cities_count[city_index] += 1
-        addressLoc = city[randint(0, len(city) - 1)]
-        city.remove(addressLoc) # Remove the address from the list so we don't get the same one twice
-        # Set the parameters for the API call to Google Street View
+    elevations = []
+    for coord in cities:
+        el_params = {"locations": f"{coord[1]},{coord[0]}", "key": args.key}
+        el_resp = requests.get(ELEVATION_URL, params=el_params).json()
+        elevations.append(el_resp["results"][0]["elevation"])
+    
+    geocodes = []
+    for coord in cities:
+        geo_params = {"latlng": f"{coord[1]},{coord[0]}", "key": args.key}
+        geo_resp = requests.get(GEOCODING_URL, params=geo_params).json()
+        city_name, state_name, area_name = "", "", ""
+        if geo_resp.get("results"):
+            components = geo_resp["results"][0].get("address_components", [])
+            for comp in components:
+                if "locality" in comp["types"]:
+                    city_name = comp["long_name"]
+                if "administrative_area_level_1" in comp["types"]:
+                    state_name = comp["long_name"]
+                if "sublocality" in comp["types"] or "neighborhood" in comp["types"]:
+                    area_name = comp["long_name"]
+        geocodes.append([city_name, state_name, area_name])
+    meta_output = open(os.path.join(args.output, 'meta.jsonl'), 'w')
+    
+    for i in tqdm(range(total_images)):
+        city_idx = i // args.icount
+
+        # Retry loop to avoid ZERO_RESULTS and ensure valid pano
+        success = False
+        for attempt in range(8):
+            # jitter around city center
+            lat_j, lon_j = jitter((cities[city_idx][1], cities[city_idx][0]))
+
+            # check metadata first to avoid wasting money on image API
+            meta_params = {
+                "location": f"{lat_j},{lon_j}",
+                "radius": 80,   # let Google search within 80m for nearest pano
+                "key": args.key
+            }
+            meta_resp = requests.get(STREETVIEW_METADATA_URL, params=meta_params).json()
+
+            if meta_resp.get("status") == "OK":
+                success = True
+                break  # valid pano found, proceed
+        if not success:
+            # skip this image and move on
+            continue
+
+        # actual pano location (Google may snap slightly)
+        pano_lat = meta_resp["location"]["lat"]
+        pano_lon = meta_resp["location"]["lng"]
+        date = meta_resp.get("date", "")
+
+        elev = elevations[city_idx]
+
+        # Street View image parameters
         params = {
             'key': args.key,
             'size': '640x640',
-            'location': str(addressLoc[1]) + ',' + str(addressLoc[0]),
+            'location': f"{pano_lat},{pano_lon}",
             'heading': str((randint(0, 3) * 90) + randint(-15, 15)),
             'pitch': '20',
-            'fov': '90'
-            }
-        
-        response = requests.get(url, params)
-        
-        # Save the image to the output folder
+            'fov': '90',
+            'radius': 80
+        }
+
+        response = requests.get(STREETVIEW_URL, params)
+
+        # Save image
         with open(os.path.join(args.output, f'street_view_{i}.jpg'), "wb") as file:
             file.write(response.content)
-        
-        # Save the coordinates to the output file
-        csv_writer.writerow([addressLoc[1], addressLoc[0]])
 
-    coord_output_file.close()
-    
-    for i in range(len(cities_count)):
-        city_count = cities_count[i]
-        city_name = os.listdir(args.cities)[i]
-        print(f'{city_count} images pulled from {city_name}')
+        record = {
+            "id": i,
+            "img": f"street_view_{i}.jpg",
+            "lat": pano_lat,
+            "lon": pano_lon,
+            "elevation": elev,
+            "date": date,
+            "city": geocodes[city_idx][0],
+            "state": geocodes[city_idx][1],
+            "area": geocodes[city_idx][2]
+        }
+        meta_output.write(json.dumps(record) + "\n")
+
+    meta_output.close()
 
 if __name__ == '__main__':
     main()
