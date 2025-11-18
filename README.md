@@ -5,6 +5,7 @@
 This project was done personally as an opportunity to learn more about CNN & MLPs by creating a ML Model that could reliably guess a random location in one of five US cities given only a Google Street View image. The idea was inspired by the game GeoGuessr where the user is given a random Google Street View location and have to guess based on the Street View their location in the world.
 
 ## Update
+
 Stanford Grad Students have recently released a model called PIGEON which significantly outperforms ours, I suggest you check it out [here](https://huggingface.co/geolocal/StreetCLIP)
 
 ## Project Overview
@@ -36,13 +37,15 @@ While the model is by no means perfect, it is suprisingly accurate given the lim
 In order to run a pretrained model you can download it from Google Drive: [![Open In Drive](https://img.shields.io/badge/Google%20Drive-5383ec?style=flat&logo=googledrive&logoColor=5383ec&label=%E2%80%8B)](https://drive.google.com/file/d/1VJpeLJp6jC8IUfKy6cAtZ9WZcX1TTutW/view?usp=sharing) or you can use the Google Colab: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Stelath/geoguessr-ai/blob/main/notebook/GeoGuessr_AI_Demo.ipynb).
 
 ### Train a Model
+
 You can use the [get_images.py](https://github.com/Stelath/geoguessr-ai/blob/main/get_images.py "get_images.py") script to download a database of images through Google Cloud, they allow 28,500 free Google Street View API calls each month so keep that in mind (anything more and you will be charged $0.007 per image), you will also have to set up a Google Cloud account. You can also download the database of Google Street View images I created [here](https://www.kaggle.com/stelath/city-street-view-dataset).
 
 After you have a database of images running the [dataset_builder_multi_label.py](https://github.com/Stelath/geoguessr-ai/blob/main/dataset_builder_multi_label.py) script will preprocess all of the images, then running [main.py](https://github.com/Stelath/geoguessr-ai/blob/main/main.py) will begin training the model.
 
 Here is a set of commands that would be used to train a model on 25,000 images (keep in mind you will need a cities folder containing `.geojson` files from [Open Addresses](https://openaddresses.io/)):
+
 ```
-python -m get_images --cities cities/ --output images/ --icount 25000 --key (YOUR GSV API KEY HERE)
+python3 get_images.py --cities cities_list.jsonl --key (YOUR GSV API KEY HERE)
 python -m dataset_builder_multi_label --file images/picture_coords.csv --images images/ --output geoguessr_dataset/
 python -m main geoguessr_dataset/ -a wide_resnet50_2 -b 16 --lr 0.0001 -j 6 --checkpoint-step 1
 ```
