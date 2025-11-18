@@ -4,17 +4,22 @@ import torchvision.transforms as transforms
 import numpy as np
 import os, os.path
 from PIL import Image
+import json
 
 class GeoGuessrDataset(Dataset):
     def __init__(self, data_dir):
         self.data_dir = data_dir
-        self.targets = np.load(os.path.join(data_dir, 'targets.npy'), allow_pickle=True)
+        self.meta = []
+        with open(os.path.join(data_dir, 'meta.jsonl'), 'r') as f:
+            for line in f:
+                self.meta.append(json.loads(line))
 
     def __len__(self):
-        return len(os.listdir(self.data_dir)) - 1
+        return len(self.meta)
 
     def __getitem__(self, idx):
-        data_path = os.path.join(self.data_dir, f'street_view_{idx}.jpg')
+        meta = self.meta[idx]
+        img_path = os.path.join(self.data_dir, meta["img"])
         
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                     std=[0.229, 0.224, 0.225])
@@ -24,10 +29,10 @@ class GeoGuessrDataset(Dataset):
                 normalize,
             ])
         
-        img = pil_loader(data_path)
+        img = pil_loader(img_path)
         data = transform(img)
         
-        target = torch.tensor(self.targets[idx], dtype=torch.float)
+        target = {"lat": meta["lat"], "lon": meta["lon"]}
         
         return data, target
     
