@@ -73,7 +73,7 @@ def main():
 
         # Retry loop to avoid ZERO_RESULTS and ensure valid pano
         success = False
-        for attempt in range(8):
+        for attempt in range(2):
             # jitter around city center
             lat_j, lon_j = jitter((cities[city_idx][1], cities[city_idx][0]))
 
