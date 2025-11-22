@@ -16,6 +16,7 @@ cities = []
 
 def get_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--batch", help="Batch number for processing", type=int, required=True)
     parser.add_argument("--cities", help="The file full of addresses per city to read and extract GPS coordinates from", required=True, type=str)
     parser.add_argument("--output", help="The output folder where the images will be stored, (defaults to: images/)", default='images/', type=str)
     parser.add_argument("--icount", help="Images per city", default=200, type=int)
@@ -24,9 +25,17 @@ def get_args():
 
 args = get_args()
 
-def load_cities():
+def load_cities(batch, BATCH_SIZE):
+    start_line = (batch - 1) * BATCH_SIZE
+
     with open(args.cities, 'r') as f:
-        for line in f:
+        for idx, line in enumerate(f):
+            if idx < start_line:
+                continue  
+            
+            if idx >= start_line + BATCH_SIZE:
+                break  
+            
             data = json.loads(line)
             lat = data.get("lat")
             lon = data.get("lon")
@@ -40,10 +49,13 @@ def jitter(coord, radius=0.035):
 def main():
     # Open and create all the necessary files & folders
     os.makedirs(args.output, exist_ok=True)
+    execute_batch = args.batch
+    BATCH_SIZE = 50 # 50 * 200 * 2 = 20000 ( retry 2 times)
+    load_cities(execute_batch, BATCH_SIZE)
+   
     
-    load_cities()
-    
-    total_images = args.icount * len(cities)
+    num_cities = len(cities)
+    total_images = num_cities * args.icount
     
     elevations = []
     for coord in cities:
@@ -66,7 +78,7 @@ def main():
                 if "sublocality" in comp["types"] or "neighborhood" in comp["types"]:
                     area_name = comp["long_name"]
         geocodes.append([city_name, state_name, area_name])
-    meta_output = open(os.path.join(args.output, 'meta.jsonl'), 'w')
+    meta_output = open(os.path.join(args.output, 'meta.jsonl'), 'a')
     
     for i in tqdm(range(total_images)):
         city_idx = i // args.icount
@@ -109,16 +121,16 @@ def main():
             'fov': '90',
             'radius': 80
         }
-
+        global_i = (execute_batch - 1) * BATCH_SIZE * args.icount + i
         response = requests.get(STREETVIEW_URL, params)
 
         # Save image
-        with open(os.path.join(args.output, f'street_view_{i}.jpg'), "wb") as file:
+        with open(os.path.join(args.output, f'street_view_{global_i}.jpg'), "wb") as file:
             file.write(response.content)
 
         record = {
-            "id": i,
-            "img": f"street_view_{i}.jpg",
+            "id": global_i,
+            "img": f"street_view_{global_i}.jpg",
             "lat": pano_lat,
             "lon": pano_lon,
             "elevation": elev,
