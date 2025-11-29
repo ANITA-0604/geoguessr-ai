@@ -45,7 +45,7 @@ After you have a database of images running the [dataset_builder_multi_label.py]
 Here is a set of commands that would be used to train a model on 25,000 images (keep in mind you will need a cities folder containing `.geojson` files from [Open Addresses](https://openaddresses.io/)):
 
 ```
-python3 get_images.py --cities cities_list.jsonl --key (YOUR GSV API KEY HERE)
+python3 get_images.py --cities cities_list.jsonl --batch (Number of the selected batch) --key (YOUR GSV API KEY HERE)
 python -m dataset_builder_multi_label --file images/picture_coords.csv --images images/ --output geoguessr_dataset/
 python -m main geoguessr_dataset/ -a wide_resnet50_2 -b 16 --lr 0.0001 -j 6 --checkpoint-step 1
 ```

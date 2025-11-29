@@ -108,6 +108,8 @@ def main():
         pano_lat = meta_resp["location"]["lat"]
         pano_lon = meta_resp["location"]["lng"]
         date = meta_resp.get("date", "")
+        if date == "":
+            continue
 
         elev = elevations[city_idx]
 
@@ -121,6 +123,7 @@ def main():
             'fov': '90',
             'radius': 80
         }
+        
         global_i = (execute_batch - 1) * BATCH_SIZE * args.icount + i
         response = requests.get(STREETVIEW_URL, params)
 
