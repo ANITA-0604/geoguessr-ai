@@ -14,6 +14,13 @@ class GeoGuessrDataset(Dataset):
             for line in f:
                 self.meta.append(json.loads(line))
 
+        self.transform = transforms.Compose([
+            transforms.Resize((256, 256)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]),
+        ])
+
     def __len__(self):
         return len(self.meta)
 
@@ -21,18 +28,22 @@ class GeoGuessrDataset(Dataset):
         meta = self.meta[idx]
         img_path = os.path.join(self.data_dir, meta["img"])
         
-        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                    std=[0.229, 0.224, 0.225])
-        transform = transforms.Compose([
-                transforms.Resize(256),
-                transforms.ToTensor(),
-                normalize,
-            ])
-        
         img = pil_loader(img_path)
-        data = transform(img)
+        data = self.transform(img)
         
-        target = {"lat": meta["lat"], "lon": meta["lon"]}
+        target = torch.tensor([
+            meta["lat_norm"],
+            meta["lon_norm"],
+            meta["gx"],
+            meta["gy"],
+            meta["offset_x"],
+            meta["offset_y"],
+            meta["elevation_norm"],
+            meta["month"],
+            meta["season"],
+            meta["haze"],
+            meta["sky_ratio"],
+        ], dtype=torch.float32)
         
         return data, target
     
