@@ -7,10 +7,10 @@ from PIL import Image
 import json
 
 class GeoGuessrDataset(Dataset):
-    def __init__(self, data_dir):
+    def __init__(self, data_dir, json_file = 'meta.jsonl'):
         self.data_dir = data_dir
         self.meta = []
-        with open(os.path.join(data_dir, 'meta.jsonl'), 'r') as f:
+        with open(os.path.join(data_dir, json_file), 'r') as f:
             for line in f:
                 self.meta.append(json.loads(line))
 
@@ -33,16 +33,19 @@ class GeoGuessrDataset(Dataset):
         
         target = torch.tensor([
             meta["state_id"],
-            meta["gx"],
-            meta["gy"],
+            meta["grid_id"],
+            meta["grid_x"],
+            meta["grid_y"],
             meta["offset_x"],
             meta["offset_y"],
             meta["elev_norm"],
             meta["month"],
             meta["season"],
-            meta["haze"],
             meta["sky_ratio"],
-        ], dtype=torch.float32)
+            meta["green_ratio"],
+            meta["brightness"],
+
+        ], dtype = torch.float32)
         
         return data, target
     

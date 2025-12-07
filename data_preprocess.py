@@ -64,7 +64,14 @@ def load_and_clean(data_path):
             if not img_path.exists():
                 continue
 
-            img = Image.open(img_path).convert("RGB")
+            # --- FIX: Handle corrupt images gracefully ---
+            try:
+                img = Image.open(img_path).convert("RGB")
+                img.load() # Force load to ensure file isn't truncated
+            except Exception as e:
+                print(f"Skipping corrupt image: {rec['img']}")
+                continue
+
             arr = np.array(img)
             # brightness
             brightness = float(arr.mean())
@@ -146,7 +153,7 @@ def add_month_season():
     records = cleaned
     print(f"After month/season filtering: {len(records)} samples")
 
-def latlon_to_grid(lat, lon, grid_size=20):\
+def latlon_to_grid(lat, lon, grid_size=20):
     
     grid_x = int((lat - US_LAT_MIN) / (US_LAT_MAX - US_LAT_MIN) * grid_size)
     grid_y = int((lon - US_LON_MIN) / (US_LON_MAX - US_LON_MIN) * grid_size)

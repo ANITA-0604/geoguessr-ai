@@ -32,11 +32,11 @@ class GeoGuessorModel(nn.Module):
         self.feature_dim = 2048
 
         # --- 2. Projection (1x1 Conv is better here than Linear for spatial data) ---
-        self.input_projection = Conv2d(self.feature_dim, d_model, kernel_size = 1)
+        self.input_projection = nn.Conv2d(self.feature_dim, d_model, kernel_size = 1)
 
         # --- 3. Positional Encoding (Learnable) ---
-        # Assuming standard ResNet output is 7x7 = 49 patches
-        self.num_patches = 7 * 7
+        # Assuming standard ResNet output is 8x8 = 64 patches
+        self.num_patches = 8 * 8
         self.pos_embedding = nn.Parameter(torch.randn(1, self.num_patches + 1, d_model))
 
         # --- 4. Transformer ---
@@ -118,25 +118,26 @@ class GeoGuessorModel(nn.Module):
         batch_size = x.shape[0]
         
         # 1. Visual Features(Extract visual features)
-        visual_features = self.backbone(x)  # Shape: [B, 2048, 7, 7]
+        features = self.backbone(x)  # Shape: [B, 2048, 8, 8]
         
         # Project to transformer dimension
-        features = self.input_projection(features) # Shape: (B, d_model, 7, 7)
+        features = self.input_projection(features) # Shape: (B, d_model, 8, 8)
 
         # 3. Flatten for Transformer
         # Reshape to [B, d_model, 49] -> Permute to [B, 49, d_model]
-        features = features.flatten().transpose(1, 2)
+        features = features.flatten(2).transpose(1, 2)
         
         # Add CLS token
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
-        x_seq = torch.cat([cls_tokens, features], dim = 1)  # [B, 50, d_model]
+        x_seq = torch.cat([cls_tokens, features], dim = 1)  # [B, 65, d_model]
 
         # 5. Add Positional Embeddings
-        # We slice pos_embedding in case image size varies
-        x_seq = x_seq + self.pos_embedding[:, :x_seq.size(1), :]
+        # Ensure we don't exceed the allocated embedding size
+        seq_len = x_seq.size(1)
+        x_seq = x_seq + self.pos_embedding[:, :seq_len, :]
         
         # 6. Transformer encoding
-        encoded = self.transformer_encoder(x_seq)  # [B, 50, d_model]
+        encoded = self.transformer_encoder(x_seq)  # [B, 65, d_model]
 
         # Take the CLS token as the global representation
         global_features = encoded[:, 0, :]  # [B, d_model]
@@ -144,8 +145,8 @@ class GeoGuessorModel(nn.Module):
         # 7. Heads
         # GRID PREDICTION - Separate gx and gy
         grid_features_out = self.grid_feature_extractor(global_features)
-        gx_logits = self.gx_head(grid_features)  # [B, 20]
-        gy_logits = self.gy_head(grid_features)  # [B, 20]
+        gx_logits = self.gx_head(grid_features_out)  # [B, 20]
+        gy_logits = self.gy_head(grid_features_out)  # [B, 20]
         
         # Get predicted grid indices
         pred_gx = torch.argmax(gx_logits, dim = 1)  # [B]
