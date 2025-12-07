@@ -148,14 +148,14 @@ def add_month_season():
 
 def latlon_to_grid(lat, lon, grid_size=20):\
     
-    gx = int((lat - US_LAT_MIN) / (US_LAT_MAX - US_LAT_MIN) * grid_size)
-    gy = int((lon - US_LON_MIN) / (US_LON_MAX - US_LON_MIN) * grid_size)
+    grid_x = int((lat - US_LAT_MIN) / (US_LAT_MAX - US_LAT_MIN) * grid_size)
+    grid_y = int((lon - US_LON_MIN) / (US_LON_MAX - US_LON_MIN) * grid_size)
 
-    gx = max(0, min(grid_size - 1, gx))
-    gy = max(0, min(grid_size - 1, gy))
+    grid_x = max(0, min(grid_size - 1, grid_x))
+    grid_y = max(0, min(grid_size - 1, grid_y))
     
-    grid_id = gx * grid_size + gy
-    return gx, gy, grid_id
+    grid_id = grid_x * grid_size + grid_y
+    return grid_x, grid_y, grid_id
 
 def normalize_elevation():
     """Min-max normalize elevation to [0, 1] and store as 'elev_norm'."""
@@ -190,17 +190,17 @@ def reformat_lat_lon(GRID_SIZE =20):
     for r in records:
         lat = r["lat"]
         lon = r["lon"]
-        gx, gy, grid_id = latlon_to_grid(lat, lon)
+        grid_x, grid_y, grid_id = latlon_to_grid(lat, lon)
 
-        cell_lat_min = US_LAT_MIN + gx * CELL_LAT_SIZE
-        cell_lon_min = US_LON_MIN + gy * CELL_LON_SIZE
+        cell_lat_min = US_LAT_MIN + grid_x * CELL_LAT_SIZE
+        cell_lon_min = US_LON_MIN + grid_y * CELL_LON_SIZE
         offset_x = (lat - cell_lat_min) / CELL_LAT_SIZE
         offset_y = (lon - cell_lon_min) / CELL_LON_SIZE
 
         r["offset_x"] = offset_x
         r["offset_y"] = offset_y
-        r["grid_x"] = gx
-        r["grid_y"] = gy
+        r["grid_x"] = grid_x
+        r["grid_y"] = grid_y
         r["grid_id"] = grid_id
 
 def split_train_val(output_path):
