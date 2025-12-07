@@ -157,6 +157,32 @@ def latlon_to_grid(lat, lon, grid_size=20):\
     grid_id = gx * grid_size + gy
     return gx, gy, grid_id
 
+def normalize_elevation():
+    """Min-max normalize elevation to [0, 1] and store as 'elev_norm'."""
+    # Change the key name here if your field name is different
+    key = "elevation"
+
+    vals = [r[key] for r in records if key in r]
+    if not vals:
+        print("No elevation field found, skip elevation normalization.")
+        return
+
+    min_e = min(vals)
+    max_e = max(vals)
+    if max_e == min_e:
+        print("All elevation values are the same, skip normalization.")
+        for r in records:
+            if key in r:
+                r["elev_norm"] = 0.5     # or 0.0, doesn't matter much
+        return
+
+    for r in records:
+        if key in r:
+            e = r[key]
+            r["elev_norm"] = (e - min_e) / (max_e - min_e)
+
+    print(f"Elevation normalized: min={min_e:.2f}, max={max_e:.2f}")
+
 def reformat_lat_lon(GRID_SIZE =20):
     CELL_LAT_SIZE = (US_LAT_MAX - US_LAT_MIN) / GRID_SIZE  
     CELL_LON_SIZE = (US_LON_MAX - US_LON_MIN) / GRID_SIZE 
@@ -202,4 +228,5 @@ if __name__ == "__main__":
     create_id_for_region()
     add_month_season()
     reformat_lat_lon()
+    normalize_elevation()
     split_train_val(args.output)
