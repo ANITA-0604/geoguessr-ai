@@ -32,13 +32,12 @@ class GeoGuessrDataset(Dataset):
         data = self.transform(img)
         
         target = torch.tensor([
-            meta["lat_norm"],
-            meta["lon_norm"],
+            meta["state_id"],
             meta["gx"],
             meta["gy"],
             meta["offset_x"],
             meta["offset_y"],
-            meta["elevation_norm"],
+            meta["elev_norm"],
             meta["month"],
             meta["season"],
             meta["haze"],
