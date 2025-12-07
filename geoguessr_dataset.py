@@ -33,7 +33,6 @@ class GeoGuessrDataset(Dataset):
         
         target = torch.tensor([
             meta["state_id"],
-            meta["grid_id"],
             meta["grid_x"],
             meta["grid_y"],
             meta["offset_x"],
