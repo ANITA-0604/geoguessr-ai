@@ -29,6 +29,10 @@ class GeoGuessorModel(nn.Module):
         # This usually outputs [Batch, 2048, 7, 7] for standard 224 x 224 images
         self.backbone = nn.Sequential(*list(resnet50.children())[: -2])
 
+        # # --- Freeze BACKBONE for now ---
+        # for param in self.backbone.parameters():
+        #     param.requires_grad = False
+
         self.feature_dim = 2048
 
         # --- 2. Projection (1x1 Conv is better here than Linear for spatial data) ---

@@ -7,19 +7,31 @@ from PIL import Image
 import json
 
 class GeoGuessrDataset(Dataset):
-    def __init__(self, data_dir, json_file = 'meta.jsonl'):
+    def __init__(self, data_dir, json_file = 'meta.jsonl', is_train = False):
         self.data_dir = data_dir
         self.meta = []
         with open(os.path.join(data_dir, json_file), 'r') as f:
             for line in f:
                 self.meta.append(json.loads(line))
 
-        self.transform = transforms.Compose([
-            transforms.Resize((256, 256)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                 std=[0.229, 0.224, 0.225]),
-        ])
+        # --- STRONGER AUGMENTATIONS ---
+        if is_train:
+            self.transform = transforms.Compose([
+                transforms.RandomResizedCrop(256, scale = (0.8, 1.0)), # Zoom in/out slightly
+                transforms.RandomHorizontalFlip(), # Flip left/right
+                transforms.ColorJitter(brightness = 0.3, contrast = 0.3, saturation = 0.3, hue = 0.1), # Change lighting
+                transforms.RandomGrayscale(p = 0.1), # Occasionally remove color
+                transforms.ToTensor(),
+                transforms.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225]),
+            ])
+        else:
+            # Validation stays simple
+            self.transform = transforms.Compose([
+                transforms.Resize((256, 256)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean = [0.485, 0.456, 0.406],
+                                    std = [0.229, 0.224, 0.225]),
+            ])
 
     def __len__(self):
         return len(self.meta)

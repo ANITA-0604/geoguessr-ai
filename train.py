@@ -5,6 +5,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Import custom modules
 from model import GeoGuessorModel
@@ -12,7 +13,7 @@ from geoguessr_dataset import GeoGuessrDataset
 
 # --- Configuration ---
 BATCH_SIZE = 32
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-5
 EPOCHS = 30
 GRID_SIZE_X = 20
 GRID_SIZE_Y = 20
@@ -39,6 +40,26 @@ def train_one_epoch(model, loader, optimizer, criterion_cls, criterion_reg, devi
         true_gy = targets[:, 2].long()
         true_offset = targets[:, 3:5] * 2 - 1
 
+        # --- DEBUG START: Check for bad data ---
+        # 1. Check for Out of Bounds (assuming grid size is 20)
+        if (true_gx < 0).any() or (true_gx >= 20).any():
+            print("\n!!! FOUND BAD GX LABEL !!!")
+            print(true_gx)
+            raise ValueError("Grid X label out of bounds (must be 0-19)")
+            
+        if (true_gy < 0).any() or (true_gy >= 20).any():
+            print("\n!!! FOUND BAD GY LABEL !!!")
+            print(true_gy)
+            raise ValueError("Grid Y label out of bounds (must be 0-19)")
+            
+        # 2. Check for NaNs in Offset
+        true_offset = targets[:, 3:5] * 2 - 1 
+        if torch.isnan(true_offset).any() or torch.isinf(true_offset).any():
+             print("\n!!! FOUND NAN/INF IN OFFSET !!!")
+             print(true_offset)
+             raise ValueError("Offset contains NaNs or Infs")
+        # --- DEBUG END ---
+
         # --- 2. Forward Pass ---
         # We will pass true grids for "Teacher Forcing" during training
         outputs = model(images, true_gx = true_gx, true_gy = true_gy, use_teacher_forcing = True)
@@ -47,7 +68,6 @@ def train_one_epoch(model, loader, optimizer, criterion_cls, criterion_reg, devi
         # Classification Loss (CrossEntropy)
         loss_gx = criterion_cls(outputs['gx_logits'], true_gx)
         loss_gy = criterion_cls(outputs['gy_logits'], true_gy)
-
         # Regression Loss (MSE)
         loss_offset = criterion_reg(outputs['offset'], true_offset)
 
@@ -115,45 +135,116 @@ def validate(model, loader, criterion_cls, criterion_reg, device):
 
     return total_loss / len(loader), correct_gx / total_samples, correct_gy / total_samples
 
+def save_plots(history):
+    epochs = range(1, len(history['train_loss']) + 1)
+
+    plt.figure(figsize = (12, 5))
+
+    # Plot Loss
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs, history['train_loss'], label = 'Train Loss')
+    plt.plot(epochs, history['val_loss'], label = 'Val Loss')
+    plt.title('Loss over Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+
+    # Plot Accuracy (Average of Grid_X and Grid_Y)
+    plt.subplot(1, 2, 2)
+    # Calculate average grid accuacy
+    train_acc_avg = [(x + y) / 2 for x, y in zip(history['train_acc_gx'], history['train_acc_gy'])]
+    val_acc_avg = [(x + y) / 2 for x, y in zip(history['val_acc_gx'], history['val_acc_gy'])]
+
+    plt.plot(epochs, train_acc_avg, label = 'Train Acc (AVG GX/GY)')
+    plt.plot(epochs, val_acc_avg, label = 'Val Acc (AVG GX/GY)')
+    plt.title('Accuracy over Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+
+    plt.tight_layout()
+    plt.savefig('training_validation_plots.png') # Save to file
+    print("Plot saved as 'training_validation_plots.png")
+
+
+
 def main():
     # --- Setup Data ---
     # Assumes structure: images/train/meta.jsonl AND images/val/meta.jsonl
     # train_path = os.path.join(DATA_DIR, json_file = 'train_meta.jsonl')
     # val_path = os.path.join(DATA_DIR, json_file = 'val_meta.jsonl')
 
-    train_ds = GeoGuessrDataset(DATA_DIR, json_file = 'train_meta.jsonl')
-    val_ds = GeoGuessrDataset(DATA_DIR, json_file = 'val_meta.jsonl')
+    train_ds = GeoGuessrDataset(DATA_DIR, json_file = 'train_meta.jsonl', is_train = True)
+    val_ds = GeoGuessrDataset(DATA_DIR, json_file = 'val_meta.jsonl', is_train = False)
 
     train_loader = DataLoader(train_ds, batch_size = BATCH_SIZE, shuffle = True, num_workers = 4)
     val_loader = DataLoader(val_ds, batch_size = BATCH_SIZE, shuffle = False, num_workers = 4)
+
+    print(f"Loaded {len(train_ds)} training images and {len(val_ds)} validation images.")
 
     # --- Setup Model ---
     model = GeoGuessorModel(
         num_grid_x = GRID_SIZE_X,
         num_grid_y = GRID_SIZE_Y,
-        d_model = 512
+        d_model = 512,
+        dropout = 0.3 # Increase from 0.1 to 0.3 or 0.4
     ).to(DEVICE)
 
-    optimizer = optim.AdamW(model.parameters(), lr = LEARNING_RATE)
+    # --- CHANGE 1: LOAD THE BEST WEIGHTS ---
+    # Load the model we just trained
+    checkpoint_path = "best_geoguessr_model.pth"
+    if os.path.exists(checkpoint_path):
+        print(f"Loading weights from {checkpoint_path} for fine-tuning...")
+        model.load_state_dict(torch.load(checkpoint_path))
+    else:
+         print("No checkpoint found! Starting from scratch (not recommended for step 2).")
 
+    # --- CHANGE 2: LOWER LEARNING RATE ---
+    # Reduce LR from 1e-4 to 1e-5 (or 2e-5)
+    # This prevents the ResNet from changing too wildly.
+    optimizer = optim.AdamW(model.parameters(), lr = LEARNING_RATE, weight_decay = 1e-3)
+
+    # --- CHANGE 3: LABEL SMOOTHING (Optional but Recommended) ---
+    # Helps when Grid 4 looks very similar to Grid 5
     # CrossEntropy for classification(Lat/Lon Grids)
-    criterion_cls = nn.CrossEntropyLoss()
+    criterion_cls = nn.CrossEntropyLoss(label_smoothing = 0.1)
     # MSE for regression(Offset inside the grid)
     criterion_reg = nn.MSELoss()
+
+    # --- History Storage ---
+    history = {
+        'train_loss': [],
+        'val_loss': [],
+        'train_acc_gx': [],
+        'train_acc_gy': [],
+        'val_acc_gx': [],
+        'val_acc_gy': [],
+    }
 
     # --- Training Loop ---
     best_acc = 0.0
 
-    train_loss, train_acc_gx, train_acc_gy = train_one_epoch(
-        model, train_loader, optimizer, criterion_cls, criterion_reg, DEVICE
-    )
+    for epoch in range(EPOCHS):
+        print(f"\n=== Epoch {epoch + 1}/{EPOCHS} ===")
 
-    val_loss, val_acc_gx, val_acc_gy = validation(
-        model, val_loader, criterion_cls, criterion_reg, DEVICE
-    )
+        train_loss, train_acc_gx, train_acc_gy = train_one_epoch(
+            model, train_loader, optimizer, criterion_cls, criterion_reg, DEVICE
+        )
 
-    print(f"Train Loss: {train_loss:.4f} | GridX Acc: {train_acc_gx:.2%} | GridY Acc: {train_acc_gy:.2%}")
-    print(f"Val Loss:   {val_loss:.4f} | GridX Acc: {val_acc_gx:.2%} | GridY Acc: {val_acc_gy:.2%}")
+        val_loss, val_acc_gx, val_acc_gy = validate(
+            model, val_loader, criterion_cls, criterion_reg, DEVICE
+        )
+
+        # Store History
+        history['train_loss'].append(train_loss)
+        history['val_loss'].append(val_loss)
+        history['train_acc_gx'].append(train_acc_gx)
+        history['train_acc_gy'].append(train_acc_gy)
+        history['val_acc_gx'].append(val_acc_gx)
+        history['val_acc_gy'].append(val_acc_gy)
+
+        print(f"Train Loss: {train_loss:.4f} | GridX Acc: {train_acc_gx:.2%} | GridY Acc: {train_acc_gy:.2%}")
+        print(f"Val Loss:   {val_loss:.4f} | GridX Acc: {val_acc_gx:.2%} | GridY Acc: {val_acc_gy:.2%}")
 
     # Save Best Model
     avg_val_acc = (val_acc_gx + val_acc_gy) / 2
@@ -161,6 +252,9 @@ def main():
         best_acc = avg_val_acc
         torch.save(model.state_dict(), "best_geoguessr_model.pth")
         print("New Best Model Saved!")
+
+    # --- Plot Results ---
+    save_plots(history)
 
 if __name__ == "__main__":
     main()
