@@ -133,4 +133,5 @@ dmypy.json
 /images
 /geoguessr_dataset
 /runs
-/tensorboard
+/best_geoguessr_model.pth
+best_geoguessr_model.pth
